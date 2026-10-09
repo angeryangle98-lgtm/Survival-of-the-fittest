@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>WILDBOUND: POOL WARS</title>
+<style>
+:root{--gold:#e9c56b;--panel:#111b18eF;--line:#dfc77b55;--muted:#aab8ad}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17231d;color:#f5f0df;font-family:system-ui,Segoe UI,sans-serif;touch-action:none}
+canvas{display:block;width:100vw;height:100dvh}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 28px #0005;backdrop-filter:blur(8px)}
+#top{position:fixed;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+#brand,#stats{padding:9px 12px;pointer-events:auto}#brand b{display:block;color:var(--gold);letter-spacing:.12em;font-size:13px}#brand small{font-size:10px;color:var(--muted)}
+#stats{font-size:11px;display:flex;gap:10px;align-items:center}#stats strong{color:var(--gold)}
+#leftPanel{position:fixed;top:85px;left:10px;width:184px;padding:10px}
+#rightPanel{position:fixed;top:85px;right:10px;width:195px;padding:10px}
+h3{font-size:11px;color:var(--gold);letter-spacing:.1em;margin:0 0 7px;text-transform:uppercase}
+p{font-size:11px;margin:5px 0;line-height:1.4}.muted{color:var(--muted)}
+#resources{display:grid;grid-template-columns:1fr 1fr;gap:6px}.resource{padding:8px;border:1px solid #ffffff1b;border-radius:8px;font-size:11px;background:#ffffff08}
+#players{max-height:155px;overflow:hidden}.playerrow{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px solid #ffffff12}
+#feed{position:fixed;left:50%;top:95px;transform:translateX(-50%);max-width:80vw;text-align:center;padding:9px 13px;opacity:0;transition:opacity .15s;font-size:12px;pointer-events:none}
+#actions{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:7px;align-items:center}
+button{font:700 11px system-ui;cursor:pointer;color:#f8f1da;background:#202b25;border:1px solid #dfc77b88;border-radius:9px;padding:11px 13px}
+button.primary{background:var(--gold);color:#172018}
+#help{position:fixed;bottom:12px;left:10px;padding:9px;font-size:10px;color:#d0d8cf}
+#connect{position:fixed;inset:0;z-index:10;background:#101915eF;display:flex;align-items:center;justify-content:center;padding:18px}
+#connect .card{width:min(430px,100%);padding:22px}
+input{width:100%;padding:12px;border-radius:8px;background:#0d1411;color:#fff;border:1px solid var(--line);margin:7px 0 12px;font-size:14px}
+#connect h1{color:var(--gold);letter-spacing:.08em;font-size:24px;margin:0 0 6px}#connect p{color:#c4cec4;font-size:12px;line-height:1.6}
+#reward{display:none;position:fixed;z-index:8;inset:0;background:#06100dcc;align-items:center;justify-content:center;padding:16px}
+#reward .card{width:min(680px,100%);padding:18px}#reward h2{margin:0 0 5px;color:var(--gold)}#offers{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}
+.offer{padding:14px 10px;text-align:center;min-height:145px;display:flex;flex-direction:column;align-items:center;gap:8px;background:#1b2b23;border:1px solid #d9c26a66;border-radius:12px;color:#f8f0d4}
+.offer .icon{font-size:28px}.offer b{font-size:13px}.offer span{font-size:11px;font-weight:400;color:#c2cec3;line-height:1.4}
+#mobile{display:none;position:fixed;bottom:14px;left:12px;right:12px;justify-content:space-between;align-items:end;pointer-events:none}
+#pad{width:120px;height:120px;border-radius:50%;border:1px solid #ffffff44;background:#111a17b9;position:relative;pointer-events:auto}
+.padbtn{position:absolute;width:38px;height:38px;padding:0;background:#ffffff18;border-color:#ffffff35;font-size:17px}
+#up{top:4px;left:40px}#down{bottom:4px;left:40px}#left{left:4px;top:40px}#right{right:4px;top:40px}
+#mobileActions{display:flex;flex-direction:column;gap:7px;align-items:end;pointer-events:auto}
+@media(max-width:700px){#leftPanel{top:78px;width:145px;padding:8px}#rightPanel{top:78px;width:145px;padding:8px}#stats{gap:6px;font-size:9px;padding:8px}#brand{padding:8px}#brand b{font-size:11px}#brand small{font-size:8px}p{font-size:9px}#players{max-height:90px}#help{display:none}#mobile{display:flex}#actions{bottom:146px;left:auto;right:10px;transform:none;flex-direction:column;align-items:end}button{padding:9px;font-size:10px}#offers{grid-template-columns:1fr}#reward .card{max-height:90vh;overflow:auto}.offer{min-height:70px;flex-direction:row;text-align:left;padding:9px}.offer .icon{font-size:24px}}
+</style></head>
+<body>
+<canvas id="game"></canvas>
+<div id="top"><div id="brand" class="panel"><b>WILDBOUND</b><small>POOL WARS · ONLINE ARENA</small></div><div id="stats" class="panel"><span>♥ <strong id="hp">100</strong></span><span>LV <strong id="lv">1</strong></span><span>ROOM <strong id="room">0/8</strong></span><span>POOL <strong id="energy">0</strong></span></div></div>
+<div id="leftPanel" class="panel"><h3>Backpack</h3><div id="resources"><div class="resource">🪵 Wood: <b id="wood">0</b></div><div class="resource">🪨 Stone: <b id="stone">0</b></div></div><p class="muted">Deposit 3+ resources at the central pool to choose one of three blessings.</p><button id="deposit">DEPOSIT AT POOL</button></div>
+<div id="rightPanel" class="panel"><h3>Survivors</h3><div id="players"></div><h3 style="margin-top:9px">Field Guide</h3><p>Gather resources, race to the pool, choose a reward, then fight players and monsters.</p><p class="muted">WASD / arrows · E gather · Space attack · Q ability</p><p id="loadout" class="muted">No blessing equipped</p></div>
+<div id="feed" class="panel"></div>
+<div id="actions"><button id="gather">E · GATHER</button><button id="attack" class="primary">SPACE · ATTACK</button><button id="ability">Q · ABILITY</button></div>
+<div id="help" class="panel">WASD / arrows: move<br>E: gather · Space: attack<br>Q: use equipped ability</div>
+<div id="mobile"><div id="pad"><button class="padbtn" id="up">▲</button><button class="padbtn" id="down">▼</button><button class="padbtn" id="left">◀</button><button class="padbtn" id="right">▶</button></div><div id="mobileActions"><button id="mGather">GATHER</button><button id="mAttack" class="primary">ATTACK</button><button id="mAbility">ABILITY</button></div></div>
+<div id="connect"><div class="card panel"><h1>POOL WARS</h1><p>Join the shared arena. Up to 8 players per room. The server controls movement, resources, rewards and combat.</p><label for="name">Player name</label><input id="name" maxlength="16" placeholder="Survivor" value="Survivor"><label for="serverUrl">Server address (optional)</label><input id="serverUrl" placeholder="Auto-detect from this page"><button class="primary" id="join" style="width:100%">JOIN ARENA</button><p id="connectStatus">Enter your name, then join.</p></div></div>
+<div id="reward"><div class="card panel"><h2>The Pool has awakened</h2><p>Choose one blessing. Your choice affects your next fight.</p><div id="offers"></div></div></div>
+<script>
+(()=> {
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+let W=innerWidth,H=innerHeight,dpr=Math.min(devicePixelRatio||1,2);
+function resize(){W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0)}addEventListener('resize',resize);resize();
+let ws=null,myId=null,world={w:2200,h:1600},players=[],nodes=[],monsters=[],pool={x:1100,y:800,r:105},poolEnergy=0,me=null,offers=[],toastTimer=0,toastText='';
+const keys=new Set();let touch={x:0,y:0};let lastSend=0;
+function say(s){toastText=s;const el=document.getElementById('feed');el.textContent=s;el.style.opacity=1;toastTimer=2.8}
+function emit(o){if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}
+function connect(){const name=(document.getElementById('name').value||'Survivor').trim().slice(0,16);let url=document.getElementById('serverUrl').value.trim();if(!url){url=(location.protocol==='https:'?'wss://':'ws://')+location.host;}else{url=url.replace(/^http/,'ws');if(!/^wss?:\/\//.test(url))url='ws://'+url;}
+document.getElementById('connectStatus').textContent='Connecting to '+url+' …';
+try{ws=new WebSocket(url+(url.includes('?')?'&':'?')+'name='+encodeURIComponent(name));}catch(e){document.getElementById('connectStatus').textContent='Invalid server address.';return;}
+ws.onopen=()=>{document.getElementById('connectStatus').textContent='Connected. Syncing arena…';};
+ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch{return}
+if(m.type==='welcome'){myId=m.id;document.getElementById('connect').style.display='none';say('Connected! Gather fast and reach the pool.')}
+if(m.type==='full'){document.getElementById('connectStatus').textContent=m.message||'Room full';}
+if(m.type==='state'){world=m.world||world;players=m.players||players;nodes=m.nodes||nodes;monsters=m.monsters||monsters;pool=m.pool||pool;poolEnergy=m.poolEnergy||0;me=players.find(p=>p.id===myId)||me;updateUI();}
+if(m.type==='notice')say(m.message);
+if(m.type==='noticeAll')say(m.message);
+if(m.type==='leave')say(m.name+' left the arena.');
+if(m.type==='pool'){poolEnergy=m.poolEnergy;document.getElementById('energy').textContent=poolEnergy;}
+if(m.type==='reward'){offers=m.offers||[];if(offers.length)showOffers();else document.getElementById('reward').style.display='none';}
+};
+ws.onclose=()=>{if(myId){say('Disconnected from server. Refresh or reconnect.');document.getElementById('connect').style.display='flex';document.getElementById('connectStatus').textContent='Connection closed. Check server and retry.';}};
+ws.onerror=()=>{document.getElementById('connectStatus').textContent='Could not connect. Make sure the server is running and the address is correct.';};
+}
+document.getElementById('join').onclick=connect;
+function updateUI(){if(!me)return;document.getElementById('hp').textContent=me.hp;document.getElementById('lv').textContent=me.level;document.getElementById('room').textContent=players.length+'/8';document.getElementById('energy').textContent=poolEnergy;document.getElementById('wood').textContent=me.wood;document.getElementById('stone').textContent=me.stone;document.getElementById('loadout').textContent='Weapon: '+(me.weapon||'none')+' · Ability: '+(me.ability||'none')+(me.shield?' · Shield '+me.shield:'');
+document.getElementById('players').innerHTML=players.map(p=>`<div class="playerrow"><span style="color:${p.color}">${p.name}${p.id===myId?' (you)':''}</span><span>${p.alive?'♥ '+p.hp:'OUT'} · ★${p.score}</span></div>`).join('');}
+function showOffers(){document.getElementById('offers').innerHTML=offers.map(o=>`<button class="offer" data-id="${o.id}"><span class="icon">${o.icon}</span><b>${o.name}</b><span>${o.description}</span></button>`).join('');document.getElementById('reward').style.display='flex';document.querySelectorAll('.offer').forEach(b=>b.onclick=()=>{emit({type:'chooseReward',id:b.dataset.id});document.getElementById('reward').style.display='none';offers=[];});}
+function gather(){emit({type:'gather'})}function attack(){emit({type:'attack'})}function ability(){emit({type:'attack',mode:'ability'})}
+document.getElementById('gather').onclick=gather;document.getElementById('mGather').onclick=gather;document.getElementById('attack').onclick=attack;document.getElementById('mAttack').onclick=attack;document.getElementById('ability').onclick=ability;document.getElementById('mAbility').onclick=ability;
+document.getElementById('deposit').onclick=()=>emit({type:'deposit'});
+document.getElementById('name').addEventListener('keydown',e=>{if(e.key==='Enter')connect();});
+addEventListener('keydown',e=>{if(e.target&&(e.target.tagName==='INPUT'))return;let k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys.add(k);if(!e.repeat){if(k==='e')gather();if(k===' ')attack();if(k==='q')ability();if(k==='r')emit({type:'deposit'});}});
+addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+function bindDir(id,dx,dy){const el=document.getElementById(id);let pointer=null;const down=e=>{e.preventDefault();pointer=e.pointerId;touch.x=dx;touch.y=dy;el.setPointerCapture?.(e.pointerId)};const up=e=>{e.preventDefault();if(pointer===e.pointerId){touch.x=0;touch.y=0;pointer=null}};el.addEventListener('pointerdown',down);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up);el.addEventListener('lostpointercapture',up)}
+bindDir('up',0,-1);bindDir('down',0,1);bindDir('left',-1,0);bindDir('right',1,0);
+const camera={x:1100,y:1000};
+function scr(x,y){return{x:x-camera.x+W/2,y:y-camera.y+H/2}}
+function poly(a,c){ctx.beginPath();ctx.moveTo(a[0][0],a[0][1]);for(let i=1;i<a.length;i++)ctx.lineTo(a[i][0],a[i][1]);ctx.closePath();ctx.fillStyle=c;ctx.fill()}
+function ell(x,y,rx,ry,c){ctx.beginPath();ctx.ellipse(x,y,rx,ry,0,0,Math.PI*2);ctx.fillStyle=c;ctx.fill()}
+function ground(){ctx.fillStyle='#354c37';ctx.fillRect(0,0,W,H);const t=64;const sx=Math.floor((camera.x-W/2)/t)*t,sy=Math.floor((camera.y-H/2)/t)*t;for(let y=sy;y<camera.y+H/2+t;y+=t)for(let x=sx;x<camera.x+W/2+t;x+=t){let s=scr(x,y);let v=Math.sin(x*.013+y*.02);ctx.fillStyle=v>.4?'#40583b':v<-.5?'#304632':'#385138';ctx.fillRect(s.x,s.y,t+1,t+1);}}
+function tree(x,y,seed=1){const s=scr(x,y);ell(s.x,s.y+7,23,9,'#18261dcc');poly([[s.x-6,s.y],[s.x-5,s.y-28],[s.x+5,s.y-28],[s.x+7,s.y]],'#67482e');poly([[s.x-29,s.y-26],[s.x-18,s.y-49],[s.x+1,s.y-59],[s.x+23,s.y-43],[s.x+29,s.y-23],[s.x+9,s.y-9],[s.x-12,s.y-11]],'#4f7a3d');poly([[s.x-18,s.y-48],[s.x+1,s.y-59],[s.x+23,s.y-43],[s.x+7,s.y-31]],'#7da34d');}
+function rock(x,y){const s=scr(x,y);ell(s.x,s.y+6,23,8,'#18261d');poly([[s.x-25,s.y],[s.x-17,s.y-20],[s.x-4,s.y-33],[s.x+16,s.y-27],[s.x+26,s.y-6],[s.x+10,s.y+5],[s.x-11,s.y+5]],'#6b7d6c');poly([[s.x-17,s.y-20],[s.x-4,s.y-33],[s.x+16,s.y-27],[s.x+5,s.y-13],[s.x-8,s.y-12]],'#a4ad94');}
+function drawPool(){const s=scr(pool.x,pool.y);ell(s.x,s.y+10,pool.r+28,pool.r*.65,'#152b27');ell(s.x,s.y,pool.r+20,pool.r*.63,'#8aab69');ell(s.x,s.y-3,pool.r+9,pool.r*.56,'#256b78');ell(s.x,s.y-6,pool.r-4,pool.r*.43,'#38b6c1');ell(s.x-22,s.y-12,25,8,'#8cf2e6aa');ctx.strokeStyle='#b4f7ef';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(s.x,s.y-5,pool.r+10,pool.r*.56,0,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#eaffd2';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText('THE POOL',s.x,s.y-pool.r*.65-16);ctx.font='10px system-ui';ctx.fillText('ENERGY '+poolEnergy,s.x,s.y+pool.r*.65+21);}
+function drawNode(n){if(n.amount<=0)return;if(n.type==='wood')tree(n.x,n.y,1);else rock(n.x,n.y);const s=scr(n.x,n.y);ctx.fillStyle='#f2e6bd';ctx.font='10px system-ui';ctx.textAlign='center';ctx.fillText(n.type==='wood'?'WOOD':'STONE',s.x,s.y+20);}
+function drawMonster(m){if(m.hp<=0)return;const s=scr(m.x,m.y);ell(s.x,s.y+8,19,7,'#18231d');ell(s.x,s.y-7,15,15,'#7b554a');ell(s.x-6,s.y-11,4,4,'#ef695c');ell(s.x+6,s.y-11,4,4,'#ef695c');ctx.fillStyle='#17231c';ctx.fillRect(s.x-17,s.y-29,34,4);ctx.fillStyle='#d95b50';ctx.fillRect(s.x-17,s.y-29,34*(m.hp/m.maxHp),4);}
+function drawPlayer(p){if(!p.alive)return;const s=scr(p.x,p.y);ell(s.x,s.y+11,14,6,'#17231dcc');poly([[s.x-10,s.y-2],[s.x-7,s.y-17],[s.x+7,s.y-17],[s.x+10,s.y-2]],p.color);ell(s.x,s.y-24,7,7,'#d8ac7d');ell(s.x,s.y-27,8,4,'#43392b');ctx.fillStyle='#f4f0d8';ctx.font='bold 10px system-ui';ctx.textAlign='center';ctx.fillText(p.name+(p.id===myId?' ★':''),s.x,s.y-38);ctx.fillStyle='#17231d';ctx.fillRect(s.x-15,s.y-34,30,3);ctx.fillStyle='#8de18a';ctx.fillRect(s.x-15,s.y-34,30*(p.hp/p.maxHp),3);if(p.shield>0){ctx.strokeStyle='#7feaff';ctx.beginPath();ctx.arc(s.x,s.y-9,21,0,Math.PI*2);ctx.stroke();}}
+function draw(){ground();const all=[];for(const n of nodes)if(n.amount>0)all.push({y:n.y,fn:()=>drawNode(n)});for(const m of monsters)if(m.hp>0)all.push({y:m.y,fn:()=>drawMonster(m)});for(const p of players)if(p.alive)all.push({y:p.y,fn:()=>drawPlayer(p)});all.push({y:pool.y-40,fn:drawPool});all.sort((a,b)=>a.y-b.y);for(const o of all)o.fn();
+if(me){const s=scr(me.x,me.y);ctx.strokeStyle='#f5dc7b';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(s.x,s.y,18,0,Math.PI*2);ctx.stroke();}}
+let last=performance.now();
+function loop(now){const dt=Math.min((now-last)/1000,.05);last=now;let dx=0,dy=0;if(keys.has('w')||keys.has('arrowup'))dy--;if(keys.has('s')||keys.has('arrowdown'))dy++;if(keys.has('a')||keys.has('arrowleft'))dx--;if(keys.has('d')||keys.has('arrowright'))dx++;dx+=touch.x;dy+=touch.y;const len=Math.hypot(dx,dy)||1;dx/=len;dy/=len;
+if(ws&&ws.readyState===1&&now-lastSend>45){emit({type:'move',dx,dy});lastSend=now;}
+if(me){camera.x+=(me.x-camera.x)*Math.min(1,dt*5);camera.y+=(me.y-camera.y)*Math.min(1,dt*5);}
+if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)document.getElementById('feed').style.opacity=0;}draw();requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+})();
+</script></body></html>
