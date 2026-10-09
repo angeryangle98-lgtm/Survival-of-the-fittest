@@ -1,0 +1,9 @@
+{
+  "name": "wildbound-pool-wars",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Small authoritative WebSocket multiplayer survival arena prototype",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "ws": "^8.18.0" }
+}
